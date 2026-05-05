@@ -29,6 +29,7 @@ class Courier(models.Model):
         return f"Courier: {self.user.username}"
 
 
+
 # ==================== ЗАКАЗЫ ====================
 
 class Order(models.Model):
@@ -62,6 +63,36 @@ class Order(models.Model):
     # Для паттерна Состояние
     state_name = models.CharField(max_length=50, default='NewOrderState')
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._state = None
+    
+    @property
+    def state(self):
+        if self._state is None:
+            from app.patterns.state.order_state import NewOrderState, PaymentPendingState, CourierAssignedState, InDeliveryState, DeliveredState, CancelledState
+            
+            state_map = {
+                'new': NewOrderState(),
+                'payment_pending': PaymentPendingState(),
+                'courier_assigned': CourierAssignedState(),
+                'in_delivery': InDeliveryState(),
+                'delivered': DeliveredState(),
+                'cancelled': CancelledState(),
+            }
+            self._state = state_map.get(self.status, NewOrderState())
+        return self._state
+    
+    @state.setter
+    def state(self, value):
+        self._state = value
+    
+    def next_state(self):
+        self.state.next(self)
+    
+    def cancel_order(self):
+        self.state.cancel(self)
+        
     def __str__(self):
         return f"Order #{self.id}"
 
