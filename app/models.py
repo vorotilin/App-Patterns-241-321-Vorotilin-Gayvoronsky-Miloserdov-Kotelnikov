@@ -63,13 +63,9 @@ class Order(models.Model):
     # Для паттерна Состояние
     state_name = models.CharField(max_length=50, default='NewOrderState')
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._state = None
-    
     @property
     def state(self):
-        if self._state is None:
+        if not hasattr(self, '_state') or self._state is None:
             from app.patterns.state.order_state import NewOrderState, PaymentPendingState, CourierAssignedState, InDeliveryState, DeliveredState, CancelledState
             
             state_map = {

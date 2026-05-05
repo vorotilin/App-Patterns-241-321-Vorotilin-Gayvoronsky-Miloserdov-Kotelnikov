@@ -1,3 +1,4 @@
+from django.contrib import admin
 from .models import User, Client, Courier, Order, Payment, Tracking, Review, RouteGraph
 
 admin.site.register(User)
