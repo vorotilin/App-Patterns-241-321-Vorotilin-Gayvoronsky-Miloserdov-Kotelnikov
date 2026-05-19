@@ -1,0 +1,45 @@
+{% extends "app/base.html" %}
+{% block title %}State — Состояния заказа{% endblock %}
+{% block content %}
+<h1>State — Жизненный цикл заказа</h1>
+<pre>new → payment_pending → courier_assigned → in_delivery → delivered → (отмена из любого)</pre>
+<table border="1" cellpadding="4">
+  <tr>
+    <th>#</th>
+    <th>Клиент</th>
+    <th>Текущее состояние</th>
+    <th>Следующий статус</th>
+    <th>Действия</th>
+  </tr>
+  {% for order in orders %}
+  <tr>
+    <td><a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></td>
+    <td>{{ order.user.username }}</td>
+    <td><strong>{{ order.get_status_display }}</strong></td>
+    <td>
+      {% if order.status == 'new' %}Ожидает оплаты
+      {% elif order.status == 'payment_pending' %}Назначен курьер
+      {% elif order.status == 'courier_assigned' %}В доставке
+      {% elif order.status == 'in_delivery' %}Доставлен
+      {% else %}—{% endif %}
+    </td>
+    <td>
+      {% if order.status != 'delivered' and order.status != 'cancelled' %}
+      <form method="post" action="{% url 'order_next_state' order.id %}">
+        {% csrf_token %}
+        <button type="submit">Вперёд</button>
+      </form>
+      <form method="post" action="{% url 'order_cancel' order.id %}">
+        {% csrf_token %}
+        <button type="submit">Отменить</button>
+      </form>
+      {% else %}
+      {{ order.get_status_display }}
+      {% endif %}
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">Нет заказов</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

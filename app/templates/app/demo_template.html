@@ -1,0 +1,43 @@
+{% extends "app/base.html" %}
+{% block title %}Template Method — Процесс доставки{% endblock %}
+{% block content %}
+<h1>Template Method — Процесс доставки</h1>
+
+{% if error %}
+<p><strong>Ошибка: {{ error }}</strong></p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <label>Процесс доставки:
+    <select name="process_type">
+      {% for choice in process_choices %}
+      <option value="{{ choice }}">{{ choice|capfirst }}</option>
+      {% endfor %}
+    </select>
+  </label><br>
+  <label>Адрес отправки:
+    <input type="text" name="pickup_address" value="ул. Красная, д. 1" size="40">
+  </label><br>
+  <label>Адрес доставки:
+    <input type="text" name="delivery_address" value="ул. Синяя, д. 20" size="40">
+  </label><br>
+  <button type="submit">Выполнить процесс</button>
+</form>
+
+{% if result %}
+<h2>Результат: {{ result.process_type|capfirst }}Delivery</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Поле</th><th>Значение</th></tr>
+  <tr><td>Заказ</td><td>#{{ result.order.id }}</td></tr>
+  <tr><td>Тариф</td><td>{{ result.order.get_tariff_display }}</td></tr>
+  <tr><td>Цена (рассчитана стратегией)</td><td>{{ result.order.price }} руб.</td></tr>
+  <tr><td>Курьер</td><td>{% if result.order.courier %}{{ result.order.courier.user.username }}{% else %}не назначен{% endif %}</td></tr>
+</table>
+
+<h2>Лог выполнения шаблонного метода</h2>
+<ol>{% for entry in result.logs %}<li>{{ entry }}</li>{% endfor %}</ol>
+
+<p><a href="{% url 'order_detail' result.order.id %}">Перейти к заказу #{{ result.order.id }}</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "app/base.html" %}
+{% block title %}A* — Кратчайший маршрут{% endblock %}
+{% block content %}
+<h1>A* — Кратчайший маршрут</h1>
+
+<h2>Граф маршрутов (из БД)</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Из</th><th>В</th><th>Расстояние (км)</th></tr>
+  {% for edge in edges %}
+  <tr><td>{{ edge.from_node }}</td><td>{{ edge.to_node }}</td><td>{{ edge.distance }}</td></tr>
+  {% empty %}
+  <tr><td colspan="3">Нет данных. Запустите <code>python populate_db.py</code></td></tr>
+  {% endfor %}
+</table>
+
+<h2>Найти кратчайший маршрут</h2>
+{% if error %}
+<p><strong>Ошибка: {{ error }}</strong></p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <label>Начальный узел:
+    <select name="start">
+      {% for node in nodes %}
+      <option value="{{ node }}" {% if result and result.start == node %}selected{% endif %}>{{ node }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Конечный узел:
+    <select name="end">
+      {% for node in nodes %}
+      <option value="{{ node }}" {% if result and result.end == node %}selected{% endif %}>{{ node }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Найти путь</button>
+</form>
+
+{% if result %}
+<h2>Результат</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>Маршрут</td><td><strong>{{ result.path_str }}</strong></td></tr>
+  <tr><td>Общее расстояние</td><td><strong>{{ result.distance }} км</strong></td></tr>
+  <tr><td>Количество узлов</td><td>{{ result.path|length }}</td></tr>
+</table>
+{% endif %}
+{% endblock %}

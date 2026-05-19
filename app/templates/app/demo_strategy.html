@@ -1,0 +1,33 @@
+{% extends "app/base.html" %}
+{% block title %}Strategy — Тарифы{% endblock %}
+{% block content %}
+<h1>Strategy — Расчёт тарифа</h1>
+
+<h2>Рассчитать стоимость</h2>
+<form method="post">
+  {% csrf_token %}
+  <label>Расстояние (км):
+    <input type="number" name="distance" value="{{ distance }}" min="1" max="1000" step="0.1">
+  </label>
+  <label>Тариф:
+    <select name="tariff">
+      <option value="economy" {% if tariff == 'economy' %}selected{% endif %}>Эконом</option>
+      <option value="standard" {% if tariff == 'standard' %}selected{% endif %}>Стандарт</option>
+      <option value="express" {% if tariff == 'express' %}selected{% endif %}>Экспресс</option>
+    </select>
+  </label>
+  <button type="submit">Рассчитать</button>
+</form>
+
+{% if result %}
+<p><strong>Результат: {{ result }} руб.</strong></p>
+{% endif %}
+
+<h2>Сравнение тарифов для {{ distance }} км</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Тариф</th><th>Ставка</th><th>Стоимость</th></tr>
+  <tr><td>Эконом</td><td>50 руб/км</td><td>{{ compare.economy }} руб.</td></tr>
+  <tr><td>Стандарт</td><td>80 руб/км</td><td>{{ compare.standard }} руб.</td></tr>
+  <tr><td>Экспресс</td><td>150 руб/км</td><td>{{ compare.express }} руб.</td></tr>
+</table>
+{% endblock %}

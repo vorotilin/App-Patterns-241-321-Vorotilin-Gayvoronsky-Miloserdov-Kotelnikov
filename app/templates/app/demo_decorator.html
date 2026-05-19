@@ -1,0 +1,47 @@
+{% extends "app/base.html" %}
+{% block title %}Decorator — Услуги к заказу{% endblock %}
+{% block content %}
+<h1>Decorator — Услуги к заказу</h1>
+
+{% if error %}
+<p><strong>Ошибка: {{ error }}</strong></p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <label>Выберите заказ:
+    <select name="order_id">
+      {% for order in orders %}
+      <option value="{{ order.id }}">
+        #{{ order.id }} — {{ order.get_tariff_display }} — {{ order.price }} руб. ({{ order.user.username }})
+      </option>
+      {% endfor %}
+    </select>
+  </label>
+  <br><br>
+  <fieldset>
+    <legend>Выберите услуги (можно несколько)</legend>
+    <label><input type="checkbox" name="decorators" value="insurance"> Страховка (+500 руб.)</label><br>
+    <label><input type="checkbox" name="decorators" value="priority"> Приоритет (+30%)</label><br>
+    <label><input type="checkbox" name="decorators" value="sms"> SMS-уведомления (+100 руб.)</label><br>
+    <label><input type="checkbox" name="decorators" value="gift_wrap"> Подарочная упаковка (+300 руб.)</label><br>
+    <label><input type="checkbox" name="decorators" value="fragile"> Хрупкий товар (+800 руб.)</label><br>
+    <label><input type="checkbox" name="decorators" value="signature"> Требуется подпись (+200 руб.)</label>
+  </fieldset>
+  <br>
+  <button type="submit">Применить декораторы</button>
+</form>
+
+{% if result %}
+<h2>Результат</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>Заказ</td><td>#{{ result.order.id }} ({{ result.order.get_tariff_display }})</td></tr>
+  <tr><td>Базовая цена</td><td>{{ result.base_price }} руб.</td></tr>
+  <tr><td>Применённые декораторы</td><td>{{ result.applied|join:", " }}</td></tr>
+  <tr><td>Итоговая цена</td><td><strong>{{ result.final_price }} руб.</strong></td></tr>
+  <tr><td>Надбавка</td><td>+{{ result.diff }} руб.</td></tr>
+  <tr><td>Описание</td><td>{{ result.description }}</td></tr>
+</table>
+{% endif %}
+{% endblock %}

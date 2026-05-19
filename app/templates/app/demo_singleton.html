@@ -1,0 +1,34 @@
+{% extends "app/base.html" %}
+{% block title %}Singleton — Logger{% endblock %}
+{% block content %}
+<h1>Singleton — Logger</h1>
+
+<table border="1" cellpadding="4">
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>logger1 is logger2</td><td><strong>{{ is_same }}</strong></td></tr>
+  <tr><td>id(logger1)</td><td>{{ id1 }}</td></tr>
+  <tr><td>id(logger2)</td><td>{{ id2 }}</td></tr>
+</table>
+
+<h2>Добавить сообщение в лог</h2>
+<form method="post">
+  {% csrf_token %}
+  <input type="text" name="message" placeholder="Текст сообщения" size="40">
+  <button type="submit">Записать в лог</button>
+</form>
+
+<h2>Лог ({{ logs|length }} записей)</h2>
+{% if logs %}
+<ol>
+  {% for entry in logs %}
+  <li>{{ entry }}</li>
+  {% endfor %}
+</ol>
+<form method="post" action="{% url 'clear_logs' %}">
+  {% csrf_token %}
+  <button type="submit">Очистить лог</button>
+</form>
+{% else %}
+<p>Лог пуст.</p>
+{% endif %}
+{% endblock %}

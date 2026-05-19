@@ -1,0 +1,48 @@
+{% extends "app/base.html" %}
+{% block title %}Abstract Factory — Создание заказа{% endblock %}
+{% block content %}
+<h1>Abstract Factory — Создание заказа</h1>
+
+<h2>Создать заказ через фабрику</h2>
+{% if error %}
+<p><strong>Ошибка: {{ error }}</strong></p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <label>Тип фабрики:
+    <select name="factory_type">
+      {% for choice in factory_choices %}
+      <option value="{{ choice }}">{{ choice|capfirst }}</option>
+      {% endfor %}
+    </select>
+  </label><br>
+  <label>Адрес отправки:
+    <input type="text" name="pickup_address" value="ул. Красная, д. 1" size="40">
+  </label><br>
+  <label>Адрес доставки:
+    <input type="text" name="delivery_address" value="ул. Синяя, д. 20" size="40">
+  </label><br>
+  <button type="submit">Создать через фабрику</button>
+</form>
+
+{% if result %}
+<h2>Результат: {{ result.factory_type|capfirst }}OrderFactory</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Объект</th><th>Параметры</th></tr>
+  <tr>
+    <td>Order #{{ result.order.id }}</td>
+    <td>Тариф: {{ result.order.get_tariff_display }}, Цена: {{ result.order.price }} руб., Статус: {{ result.order.get_status_display }}</td>
+  </tr>
+  <tr>
+    <td>Payment #{{ result.payment.id }}</td>
+    <td>Сумма: {{ result.payment.amount }} руб., Метод: {{ result.payment.method }}</td>
+  </tr>
+  <tr>
+    <td>Tracking #{{ result.tracking.id }}</td>
+    <td>Статус: {{ result.tracking.status }}</td>
+  </tr>
+</table>
+<p><a href="{% url 'order_detail' result.order.id %}">Перейти к заказу #{{ result.order.id }}</a></p>
+{% endif %}
+{% endblock %}

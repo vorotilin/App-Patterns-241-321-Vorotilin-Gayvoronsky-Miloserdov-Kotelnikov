@@ -1,0 +1,41 @@
+{% extends "app/base.html" %}
+{% block title %}Список заказов{% endblock %}
+{% block content %}
+<h1>Список заказов</h1>
+<p>Всего: {{ orders|length }}</p>
+<table border="1" cellpadding="4">
+  <tr>
+    <th>#</th>
+    <th>Клиент</th>
+    <th>Тариф</th>
+    <th>Статус</th>
+    <th>Цена</th>
+    <th>Откуда</th>
+    <th>Куда</th>
+    <th>Курьер</th>
+    <th>Создан</th>
+    <th>Действия</th>
+  </tr>
+  {% for order in orders %}
+  <tr>
+    <td><a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></td>
+    <td>{{ order.user.username }}</td>
+    <td>{{ order.get_tariff_display }}</td>
+    <td>{{ order.get_status_display }}</td>
+    <td>{{ order.price }} руб.</td>
+    <td>{{ order.pickup_address }}</td>
+    <td>{{ order.delivery_address }}</td>
+    <td>{% if order.courier %}{{ order.courier.user.username }}{% else %}—{% endif %}</td>
+    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+    <td>
+      <form method="post" action="{% url 'order_next_state' order.id %}">
+        {% csrf_token %}
+        <button type="submit">Следующий статус</button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="10">Заказов нет. Запустите <code>python populate_db.py</code></td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

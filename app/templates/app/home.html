@@ -1,0 +1,34 @@
+{% extends "app/base.html" %}
+{% block title %}Главная — Система доставки{% endblock %}
+{% block content %}
+<h1>Автоматизированная система доставки документов</h1>
+<p>Группа 241-321 | Воротилин, Гайворонский, Милосердов, Котельников</p>
+
+<h2>Статистика БД</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Сущность</th><th>Количество</th></tr>
+  <tr><td>Заказы</td><td>{{ orders_count }}</td></tr>
+  <tr><td>Курьеры</td><td>{{ couriers_count }}</td></tr>
+  <tr><td>Клиенты</td><td>{{ clients_count }}</td></tr>
+  <tr><td>Платежи</td><td>{{ payments_count }}</td></tr>
+</table>
+
+<h2>Реализованные паттерны</h2>
+<ul>
+  <li><a href="{% url 'demo_singleton' %}">Singleton</a> — Logger: единственный экземпляр</li>
+  <li><a href="{% url 'demo_strategy' %}">Strategy</a> — расчёт цены по тарифу (Economy/Standard/Express)</li>
+  <li><a href="{% url 'demo_factory' %}">Abstract Factory</a> — создание заказа + платёж + трекинг</li>
+  <li><a href="{% url 'demo_decorator' %}">Decorator</a> — добавление услуг к заказу</li>
+  <li><a href="{% url 'demo_state' %}">State</a> — жизненный цикл заказа</li>
+  <li><a href="{% url 'demo_template' %}">Template Method</a> — шаблонный процесс доставки</li>
+  <li><a href="{% url 'demo_astar' %}">A* (Dijkstra)</a> — кратчайший маршрут доставки</li>
+</ul>
+
+<h2>Бизнес-процессы</h2>
+<ol>
+  <li><strong>БП1: Создание и обработка заказа</strong> — клиент создаёт заказ → оплата → назначение курьера → доставка</li>
+  <li><strong>БП2: Маршрутизация</strong> — выбор кратчайшего пути доставки через граф узлов (A*)</li>
+</ol>
+
+<p><a href="{% url 'orders_list' %}">Перейти к списку заказов →</a></p>
+{% endblock %}

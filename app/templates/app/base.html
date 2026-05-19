@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}Система доставки документов{% endblock %}</title>
+</head>
+<body>
+<nav>
+  <strong>Система доставки документов</strong> |
+  <a href="{% url 'home' %}">Главная</a> |
+  <a href="{% url 'orders_list' %}">Заказы</a> |
+  <a href="{% url 'demo_singleton' %}">Журнал событий</a> |
+  <a href="{% url 'demo_strategy' %}">Расчёт тарифа</a> |
+  <a href="{% url 'demo_factory' %}">Создание заказа</a> |
+  <a href="{% url 'demo_decorator' %}">Доп. услуги</a> |
+  <a href="{% url 'demo_state' %}">Статус заказа</a> |
+  <a href="{% url 'demo_template' %}">Процесс доставки</a> |
+  <a href="{% url 'demo_astar' %}">Маршрут доставки</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>
