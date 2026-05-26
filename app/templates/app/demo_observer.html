@@ -1,0 +1,42 @@
+{% extends "app/base.html" %}
+{% block title %}Observer — Наблюдатель{% endblock %}
+{% block content %}
+<h1>Observer — Наблюдатель</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <label>Заказ:
+    <select name="order_id">
+      {% for o in orders %}
+      <option value="{{ o.id }}">#{{ o.id }} — {{ o.user.username }} ({{ o.get_status_display }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Событие:
+    <input type="text" name="event" placeholder="Текст события" value="{% if result %}{{ result.event }}{% endif %}">
+  </label>
+  <fieldset>
+    <legend>Подписчики:</legend>
+    <label><input type="checkbox" name="observers" value="client" {% if result and 'client' in result.attached %}checked{% endif %}> Клиент</label>
+    <label><input type="checkbox" name="observers" value="courier" {% if result and 'courier' in result.attached %}checked{% endif %}> Курьер</label>
+    <label><input type="checkbox" name="observers" value="logger" {% if result and 'logger' in result.attached %}checked{% endif %}> Лог</label>
+  </fieldset>
+  <button type="submit">Отправить уведомление</button>
+</form>
+
+{% if error %}<p><strong>Ошибка: {{ error }}</strong></p>{% endif %}
+
+{% if result %}
+<h2>Результат</h2>
+<p>Заказ: #{{ result.order.id }} | Событие: <em>{{ result.event }}</em></p>
+<p>Подписчики: {{ result.attached|join:", " }}</p>
+<h3>Уведомления</h3>
+<ol>
+  {% for n in result.notifications %}
+  <li>{{ n }}</li>
+  {% empty %}
+  <li>Нет подписчиков.</li>
+  {% endfor %}
+</ol>
+{% endif %}
+{% endblock %}

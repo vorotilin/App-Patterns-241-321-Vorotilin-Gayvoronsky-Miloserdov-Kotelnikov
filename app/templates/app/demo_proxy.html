@@ -1,0 +1,66 @@
+{% extends "app/base.html" %}
+{% block title %}Proxy — Заместитель{% endblock %}
+{% block content %}
+<h1>Proxy — Заместитель</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <label>Заказ:
+    <select name="order_id">
+      {% for o in orders %}
+      <option value="{{ o.id }}">#{{ o.id }} — {{ o.user.username }} ({{ o.get_status_display }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Роль:
+    <select name="role">
+      {% for r in roles %}
+      <option value="{{ r }}" {% if result and result.role == r %}selected{% endif %}>{{ r }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Действие:
+    <select name="action">
+      <option value="get">Просмотр</option>
+      <option value="update_status">Изменить статус</option>
+      <option value="cancel">Отменить</option>
+    </select>
+  </label>
+  <label>Новый статус (для изменения):
+    <select name="new_status">
+      {% for s in status_choices %}
+      <option value="{{ s }}">{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Выполнить</button>
+</form>
+
+{% if error %}<p><strong>Ошибка: {{ error }}</strong></p>{% endif %}
+
+{% if result %}
+<h2>Результат</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Роль</th><td>{{ result.role }}</td></tr>
+  <tr><th>Действие</th><td>{{ result.action }}</td></tr>
+  <tr><th>Доступ</th><td><strong>{% if result.granted %}РАЗРЕШЕНО{% else %}ОТКАЗАНО{% endif %}</strong></td></tr>
+  {% if not result.granted %}<tr><th>Причина</th><td>{{ result.reason }}</td></tr>{% endif %}
+  {% if result.order %}<tr><th>Статус заказа</th><td>{{ result.order.get_status_display }}</td></tr>{% endif %}
+</table>
+<h3>Журнал доступа</h3>
+<ol>
+  {% for entry in result.log %}
+  <li>{{ entry }}</li>
+  {% endfor %}
+</ol>
+{% endif %}
+
+<h3>Матрица прав</h3>
+<table border="1" cellpadding="4">
+  <tr><th>Роль</th><th>Просмотр</th><th>Изменить статус</th><th>Отменить</th></tr>
+  <tr><td>admin</td><td>+</td><td>+</td><td>+</td></tr>
+  <tr><td>courier</td><td>+</td><td>+</td><td>—</td></tr>
+  <tr><td>client</td><td>+</td><td>—</td><td>+</td></tr>
+  <tr><td>guest</td><td>+</td><td>—</td><td>—</td></tr>
+</table>
+{% endblock %}

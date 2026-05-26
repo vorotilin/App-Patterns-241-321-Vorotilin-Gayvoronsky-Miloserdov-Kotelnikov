@@ -1,0 +1,51 @@
+{% extends "app/base.html" %}
+{% block title %}Command — Команда{% endblock %}
+{% block content %}
+<h1>Command — Команда</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <label>Заказ:
+    <select name="order_id">
+      {% for o in orders %}
+      <option value="{{ o.id }}">#{{ o.id }} — {{ o.user.username }} ({{ o.get_status_display }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Курьер (для назначения):
+    <select name="courier_id">
+      {% for c in couriers %}
+      <option value="{{ c.id }}">{{ c.user.username }} (рейтинг {{ c.rating }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div>
+    <button type="submit" name="action" value="next_state">Следующий статус</button>
+    <button type="submit" name="action" value="assign_courier">Назначить курьера</button>
+    <button type="submit" name="action" value="cancel">Отменить заказ</button>
+    <button type="submit" name="action" value="undo">Undo (отменить последнюю команду)</button>
+  </div>
+</form>
+
+{% if error %}<p><strong>Ошибка: {{ error }}</strong></p>{% endif %}
+
+{% if result %}
+<h2>Выполнено</h2>
+<table border="1" cellpadding="4">
+  <tr><th>Действие</th><td>{{ result.action }}</td></tr>
+  <tr><th>Команда</th><td>{{ result.cmd }}</td></tr>
+  {% if result.order %}<tr><th>Статус заказа</th><td>{{ result.order.get_status_display }}</td></tr>{% endif %}
+</table>
+{% endif %}
+
+<h2>История команд ({{ history|length }})</h2>
+{% if history %}
+<ol>
+  {% for entry in history %}
+  <li>{{ entry }}</li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>История пуста.</p>
+{% endif %}
+{% endblock %}

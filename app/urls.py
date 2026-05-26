@@ -19,4 +19,7 @@ urlpatterns = [
     path('demo/state/', views.demo_state, name='demo_state'),
     path('demo/template-method/', views.demo_template, name='demo_template'),
     path('demo/astar/', views.demo_astar, name='demo_astar'),
+    path('demo/observer/', views.demo_observer, name='demo_observer'),
+    path('demo/proxy/', views.demo_proxy, name='demo_proxy'),
+    path('demo/command/', views.demo_command, name='demo_command'),
 ]

@@ -56,7 +56,8 @@ class Order(models.Model):
     
     tariff = models.CharField(max_length=20, choices=TARIFF_CHOICES, default='economy')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    
+    distance_km = models.FloatField(default=5.0)
+
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -83,12 +84,23 @@ class Order(models.Model):
     def state(self, value):
         self._state = value
     
+    def apply_tariff(self):
+        from app.patterns.strategy.tariff_strategy import EconomyTariff, StandardTariff, ExpressTariff
+        strategy_map = {
+            'economy': EconomyTariff(),
+            'standard': StandardTariff(),
+            'express': ExpressTariff(),
+        }
+        strategy = strategy_map.get(self.tariff, StandardTariff())
+        from decimal import Decimal
+        self.price = Decimal(str(strategy.calculate_price(self.distance_km)))
+
     def next_state(self):
         self.state.next(self)
-    
+
     def cancel_order(self):
         self.state.cancel(self)
-        
+
     def __str__(self):
         return f"Order #{self.id}"
 
