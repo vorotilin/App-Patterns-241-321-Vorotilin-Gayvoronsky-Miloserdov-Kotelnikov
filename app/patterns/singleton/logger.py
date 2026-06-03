@@ -9,7 +9,12 @@ class Logger:
     
     def log(self, message):
         self.logs.append(message)
-        print(f"[LOG] {message}")
+        import sys
+        try:
+            print(f"[LOG] {message}")
+        except UnicodeEncodeError:
+            sys.stdout.buffer.write(f"[LOG] {message}\n".encode('utf-8'))
+            sys.stdout.buffer.flush()
     
     def get_logs(self):
         return self.logs
