@@ -2,12 +2,6 @@
 {% block title %}Facade — Система доставки{% endblock %}
 {% block content %}
 <h2>Facade (Фасад)</h2>
-<p>
-  <code>DeliverySystemFacade</code> предоставляет единую точку входа для клиентского кода.
-  Один вызов <code>create_order()</code> координирует AbstractFactory, Decorator,
-  Observer, Command и Singleton Logger — клиент не взаимодействует
-  с подсистемами напрямую.
-</p>
 
 <form method="post">
   {% csrf_token %}

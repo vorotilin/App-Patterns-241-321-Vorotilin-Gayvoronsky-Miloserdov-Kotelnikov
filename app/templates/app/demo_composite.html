@@ -2,17 +2,6 @@
 {% block title %}Composite + Iterator — Система доставки{% endblock %}
 {% block content %}
 <h2>Composite (Компоновщик) + Iterator (Итератор)</h2>
-<p>
-  <strong>Composite:</strong> заказы организованы в дерево
-  (корень → группы по тарифу → группы по статусу → листья-заказы).
-  Методы <code>get_total_price()</code> и <code>get_count()</code> работают
-  одинаково на любом уровне иерархии.
-</p>
-<p>
-  <strong>Iterator:</strong> <code>OrderIterator</code> обходит всё дерево в глубину
-  и возвращает только листья. <code>FilterIterator</code> фильтрует по статусу,
-  не зная о структуре дерева.
-</p>
 
 <h3>Дерево заказов (Composite)</h3>
 <p>Итого: {{ root_count }} заказов, {{ root_price }} руб.</p>

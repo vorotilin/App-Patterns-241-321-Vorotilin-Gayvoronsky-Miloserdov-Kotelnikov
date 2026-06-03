@@ -1,94 +1,142 @@
 {% extends "app/base.html" %}
-{% block title %}Главная — Система доставки{% endblock %}
+{% block title %}Доставка документов{% endblock %}
 {% block content %}
-<div class="py-3">
-  <h1 class="display-6 fw-bold">Автоматизированная система доставки документов</h1>
-  <p class="text-muted">Группа 241-321 | Воротилин, Гайворонский, Милосердов, Котельников</p>
-</div>
 
-<div class="row g-3 mb-4">
-  <div class="col-sm-3">
-    <div class="card text-bg-primary text-center">
-      <div class="card-body">
-        <h3 class="card-title">{{ orders_count }}</h3>
-        <p class="card-text mb-0">Заказов</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-3">
-    <div class="card text-bg-success text-center">
-      <div class="card-body">
-        <h3 class="card-title">{{ couriers_count }}</h3>
-        <p class="card-text mb-0">Курьеров</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-3">
-    <div class="card text-bg-info text-center">
-      <div class="card-body">
-        <h3 class="card-title">{{ clients_count }}</h3>
-        <p class="card-text mb-0">Клиентов</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-3">
-    <div class="card text-bg-warning text-center">
-      <div class="card-body">
-        <h3 class="card-title">{{ payments_count }}</h3>
-        <p class="card-text mb-0">Платежей</p>
-      </div>
-    </div>
+<style>
+  .hero { padding: 3.5rem 0 3rem; border-bottom: 1px solid #21262d; margin-bottom: 2.5rem; }
+  .hero h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; }
+  .stat-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 1.25rem 1rem; text-align: center; }
+  .stat-card .stat-value { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+  .stat-card .stat-label { font-size: 0.78rem; color: #6e7681; margin-top: 0.2rem; }
+  .section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #6e7681; font-weight: 600; margin-bottom: 1rem; }
+  .step-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 1.5rem; height: 100%; }
+  .step-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; }
+  .tariff-card { border-radius: 10px; padding: 1.75rem 1.25rem; text-align: center; height: 100%; }
+  .tariff-price { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+  .tariff-price small { font-size: 0.85rem; font-weight: 400; color: #6e7681; }
+.tariff-card-base { background: #161b22; border: 1px solid #21262d; }
+  .tariff-card-featured { background: #161b22; border: 2px solid #0d6efd; }
+</style>
+
+<!-- Hero -->
+<div class="hero">
+  <h1 class="mb-4">Доставка документов</h1>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'demo_facade' %}" class="btn btn-primary btn-lg px-4">
+      <i class="bi bi-plus-lg me-2"></i>Оформить заказ
+    </a>
+    <a href="{% url 'orders_list' %}" class="btn btn-outline-secondary btn-lg px-4">
+      <i class="bi bi-list-ul me-2"></i>Мои заказы
+    </a>
   </div>
 </div>
 
-<div class="row g-4">
+<!-- Stats -->
+<div class="row g-3 mb-5">
+  <div class="col-6 col-sm-3">
+    <div class="stat-card">
+      <div class="stat-value text-primary">{{ orders_count }}</div>
+      <div class="stat-label">Заказов</div>
+    </div>
+  </div>
+  <div class="col-6 col-sm-3">
+    <div class="stat-card">
+      <div class="stat-value text-success">{{ couriers_count }}</div>
+      <div class="stat-label">Курьеров</div>
+    </div>
+  </div>
+  <div class="col-6 col-sm-3">
+    <div class="stat-card">
+      <div class="stat-value text-info">{{ clients_count }}</div>
+      <div class="stat-label">Клиентов</div>
+    </div>
+  </div>
+  <div class="col-6 col-sm-3">
+    <div class="stat-card">
+      <div class="stat-value text-warning">{{ payments_count }}</div>
+      <div class="stat-label">Платежей</div>
+    </div>
+  </div>
+</div>
 
+<!-- How it works -->
+<div class="section-label">Как это работает</div>
+<div class="row g-3 mb-5">
   <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-header bg-warning text-dark fw-bold">Порождающие паттерны</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item"><a href="{% url 'demo_singleton' %}">Singleton</a> — Logger: единственный экземпляр</li>
-        <li class="list-group-item"><a href="{% url 'demo_factory' %}">Abstract Factory</a> — заказ + платёж + трекинг одной фабрикой</li>
-        <li class="list-group-item"><a href="{% url 'demo_decorator' %}">Decorator</a> — динамическое добавление услуг к заказу</li>
-      </ul>
+    <div class="step-card">
+      <div class="step-icon bg-primary bg-opacity-10 text-primary">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <h6 class="fw-bold mb-2">1. Оформите заказ</h6>
+      <p class="text-secondary small mb-0">
+        Выберите тариф, укажите адреса отправки и получения. Система сразу рассчитает стоимость.
+      </p>
     </div>
   </div>
-
   <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-header bg-primary text-white fw-bold">Поведенческие паттерны</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item"><a href="{% url 'demo_strategy' %}">Strategy</a> — расчёт цены по тарифу</li>
-        <li class="list-group-item"><a href="{% url 'demo_state' %}">State</a> — жизненный цикл заказа</li>
-        <li class="list-group-item"><a href="{% url 'demo_template' %}">Template Method</a> — шаблонный процесс доставки</li>
-        <li class="list-group-item"><a href="{% url 'demo_observer' %}">Observer</a> — уведомление подписчиков</li>
-        <li class="list-group-item"><a href="{% url 'demo_command' %}">Command</a> — команды с поддержкой Undo</li>
-        <li class="list-group-item"><a href="{% url 'demo_iterator' %}">Iterator</a> — обход иерархии заказов</li>
-      </ul>
+    <div class="step-card">
+      <div class="step-icon bg-success bg-opacity-10 text-success">
+        <i class="bi bi-credit-card"></i>
+      </div>
+      <h6 class="fw-bold mb-2">2. Оплатите</h6>
+      <p class="text-secondary small mb-0">
+        Принимаем карту, наличные и электронные кошельки. Оплата фиксируется мгновенно.
+      </p>
     </div>
   </div>
-
   <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-header bg-success text-white fw-bold">Структурные паттерны</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item"><a href="{% url 'demo_proxy' %}">Proxy</a> — контроль доступа по роли</li>
-        <li class="list-group-item"><a href="{% url 'demo_adapter' %}">Adapter</a> — SMS / Email через единый интерфейс</li>
-        <li class="list-group-item"><a href="{% url 'demo_facade' %}">Facade</a> — единая точка входа в систему</li>
-        <li class="list-group-item"><a href="{% url 'demo_composite' %}">Composite</a> — дерево заказов по тарифу/статусу</li>
-        <li class="list-group-item"><a href="{% url 'demo_astar' %}">A* (Dijkstra)</a> — кратчайший маршрут доставки</li>
-      </ul>
+    <div class="step-card">
+      <div class="step-icon bg-warning bg-opacity-10 text-warning">
+        <i class="bi bi-geo-alt"></i>
+      </div>
+      <h6 class="fw-bold mb-2">3. Отслеживайте</h6>
+      <p class="text-secondary small mb-0">
+        Курьер назначается автоматически по кратчайшему маршруту. Уведомления SMS и Email.
+      </p>
     </div>
   </div>
-
 </div>
 
-<div class="mt-4">
-  <h5>Бизнес-процессы</h5>
-  <ol>
-    <li><strong>БП1: Создание и обработка заказа</strong> — клиент создаёт заказ → оплата → назначение курьера → доставка</li>
-    <li><strong>БП2: Маршрутизация</strong> — выбор кратчайшего пути доставки через граф узлов (A*)</li>
-  </ol>
-  <a href="{% url 'orders_list' %}" class="btn btn-primary">Перейти к списку заказов →</a>
+<!-- Tariffs -->
+<div class="section-label">Тарифы</div>
+<div class="row g-3 mb-5">
+  <div class="col-md-4">
+    <div class="tariff-card tariff-card-base">
+      <div class="text-secondary small mb-2">Эконом</div>
+      <div class="tariff-price text-primary mb-3">50 <small>руб/км</small></div>
+      <ul class="list-unstyled text-secondary small text-start mb-4">
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Стандартная скорость</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Базовый трекинг</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Оплата наличными</li>
+      </ul>
+      <a href="{% url 'demo_strategy' %}" class="btn btn-outline-primary btn-sm w-100">Рассчитать</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="tariff-card tariff-card-featured">
+      <div class="badge bg-primary mb-2">Популярный</div>
+      <div class="text-secondary small mb-2">Стандарт</div>
+      <div class="tariff-price text-primary mb-3">80 <small>руб/км</small></div>
+      <ul class="list-unstyled text-secondary small text-start mb-4">
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Ускоренная доставка</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>SMS-уведомления</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Оплата картой</li>
+      </ul>
+      <a href="{% url 'demo_strategy' %}" class="btn btn-primary btn-sm w-100">Рассчитать</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="tariff-card tariff-card-base">
+      <div class="text-secondary small mb-2">Экспресс</div>
+      <div class="tariff-price text-warning mb-3">150 <small>руб/км</small></div>
+      <ul class="list-unstyled text-secondary small text-start mb-4">
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Приоритетный курьер</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Страховка включена</li>
+        <li class="mb-1"><i class="bi bi-check text-success me-1"></i>Трекинг в реальном времени</li>
+      </ul>
+      <a href="{% url 'demo_strategy' %}" class="btn btn-outline-warning btn-sm w-100">Рассчитать</a>
+    </div>
+  </div>
 </div>
+
 {% endblock %}
