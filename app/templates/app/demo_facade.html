@@ -17,6 +17,13 @@
   </p>
 
   <p>
+    Тип груза:
+    {% for value, label in cargo_type_choices %}
+      <label><input type="radio" name="cargo_type" value="{{ value }}" {% if forloop.first %}checked{% endif %}> {{ label }}</label>
+    {% endfor %}
+  </p>
+
+  <p>
     <label>Адрес отправки: <input type="text" name="pickup_address" value="ул. Ленина, 1" size="35"></label>
   </p>
   <p>
@@ -43,6 +50,7 @@
   <table border="1" cellpadding="4" cellspacing="0">
     <tr><th>Поле</th><th>Значение</th></tr>
     <tr><td>Заказ</td><td>#{{ result.order.id }}</td></tr>
+    <tr><td>Тип груза</td><td>{{ result.order.get_cargo_type_display }}</td></tr>
     <tr><td>Фабрика</td><td>{{ result.factory_type }}</td></tr>
     <tr><td>Тариф</td><td>{{ result.order.get_tariff_display }}</td></tr>
     <tr><td>Статус</td><td>{{ result.order.get_status_display }}</td></tr>

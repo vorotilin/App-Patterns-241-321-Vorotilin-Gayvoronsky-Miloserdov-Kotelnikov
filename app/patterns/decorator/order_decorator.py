@@ -93,13 +93,27 @@ class FragileDecorator(OrderDecorator):
 
 class SignatureRequiredDecorator(OrderDecorator):
     """Декоратор: требуется подпись при доставке"""
-    
+
     def get_price(self):
         base_price = self.order.get_price() if hasattr(self.order, 'get_price') else self.order.price
         return base_price + Decimal(200)
-    
+
     def get_description(self):
         base = self.order.get_description() if hasattr(self.order, 'get_description') else f"Заказ #{self.order.id}"
         if isinstance(self.order, OrderDecorator):
             base = self.order.get_description()
         return f"{base} + Требуется подпись"
+
+
+class PackageDecorator(OrderDecorator):
+    """Декоратор: посылка — надбавка за габариты и вес"""
+
+    def get_price(self):
+        base_price = self.order.get_price() if hasattr(self.order, 'get_price') else self.order.price
+        return base_price + Decimal(300)
+
+    def get_description(self):
+        base = self.order.get_description() if hasattr(self.order, 'get_description') else f"Заказ #{self.order.id}"
+        if isinstance(self.order, OrderDecorator):
+            base = self.order.get_description()
+        return f"{base} + Посылка (надбавка за габариты)"

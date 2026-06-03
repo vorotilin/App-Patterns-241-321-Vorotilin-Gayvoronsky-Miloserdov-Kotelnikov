@@ -14,7 +14,7 @@ from app.patterns.abstract_factory.order_factory import (
 from app.patterns.decorator.order_decorator import (
     OrderDecorator, InsuranceDecorator, PriorityDecorator,
     SMSNotifyDecorator, GiftWrapDecorator, FragileDecorator,
-    SignatureRequiredDecorator
+    SignatureRequiredDecorator, PackageDecorator,
 )
 from app.patterns.observer.order_observer import (
     OrderSubject, ClientNotifier, CourierNotifier, LoggerObserver
@@ -27,7 +27,7 @@ from app.math_models.shortest_path import ShortestPathFinder
 from app.patterns.adapter.notification_adapter import SMSGatewayAdapter, EmailServiceAdapter
 from app.patterns.facade.delivery_facade import DeliverySystemFacade, FACTORY_MAP, DECORATOR_MAP
 from app.patterns.composite.order_composite import build_tree_from_db, OrderGroup, OrderLeaf
-from app.patterns.iterator.order_iterator import OrderIterator, FilterIterator
+from app.patterns.iterator.order_iterator import OrderIterator, FilterIterator, CargoTypeFilterIterator
 
 
 # ── Главная ──────────────────────────────────────────────────────────────────
@@ -115,33 +115,44 @@ def demo_strategy(request):
     result = None
     distance = None
     tariff = None
+    cargo_type = 'document'
 
     if request.method == 'POST':
         try:
             distance = float(request.POST.get('distance', 10))
             tariff = request.POST.get('tariff', 'standard')
+            cargo_type = request.POST.get('cargo_type', 'document')
             strategies = {
                 'economy': EconomyTariff(),
                 'standard': StandardTariff(),
                 'express': ExpressTariff(),
             }
             strategy = strategies.get(tariff, StandardTariff())
-            result = strategy.calculate_price(distance)
+            result = strategy.calculate_price(distance, cargo_type)
         except (ValueError, TypeError):
             pass
 
-    # Таблица сравнения для заданного расстояния
     compare_distance = distance or 10
     compare = {
-        'economy': EconomyTariff().calculate_price(compare_distance),
-        'standard': StandardTariff().calculate_price(compare_distance),
-        'express': ExpressTariff().calculate_price(compare_distance),
+        'economy': {
+            'document': EconomyTariff().calculate_price(compare_distance, 'document'),
+            'package': EconomyTariff().calculate_price(compare_distance, 'package'),
+        },
+        'standard': {
+            'document': StandardTariff().calculate_price(compare_distance, 'document'),
+            'package': StandardTariff().calculate_price(compare_distance, 'package'),
+        },
+        'express': {
+            'document': ExpressTariff().calculate_price(compare_distance, 'document'),
+            'package': ExpressTariff().calculate_price(compare_distance, 'package'),
+        },
     }
 
     return render(request, 'app/demo_strategy.html', {
         'result': result,
         'distance': distance or compare_distance,
         'tariff': tariff,
+        'cargo_type': cargo_type,
         'compare': compare,
     })
 
@@ -163,6 +174,7 @@ def demo_factory(request):
         factory_type = request.POST.get('factory_type', 'standard')
         pickup = request.POST.get('pickup_address', '').strip()
         delivery = request.POST.get('delivery_address', '').strip()
+        cargo_type = request.POST.get('cargo_type', 'document')
 
         if not pickup or not delivery:
             error = "Заполните адреса отправки и доставки"
@@ -177,10 +189,11 @@ def demo_factory(request):
                     user=user,
                     pickup_address=pickup,
                     delivery_address=delivery,
+                    cargo_type=cargo_type,
                 )
                 payment = factory.create_payment(order, order.price)
                 tracking = factory.create_tracking(order)
-                Logger().log(f"[AbstractFactory:{factory_type}] Заказ #{order.id} создан")
+                Logger().log(f"[AbstractFactory:{factory_type}] Заказ #{order.id} ({cargo_type}) создан")
                 result = {
                     'factory_type': factory_type,
                     'order': order,
@@ -192,6 +205,7 @@ def demo_factory(request):
         'result': result,
         'error': error,
         'factory_choices': list(FACTORIES.keys()),
+        'cargo_type_choices': [('document', 'Документ'), ('package', 'Посылка')],
     })
 
 
@@ -202,7 +216,8 @@ def demo_decorator(request):
     result = None
     error = None
 
-    DECORATOR_MAP = {
+    LOCAL_DECORATOR_MAP = {
+        'package': PackageDecorator,
         'insurance': InsuranceDecorator,
         'priority': PriorityDecorator,
         'sms': SMSNotifyDecorator,
@@ -220,11 +235,14 @@ def demo_decorator(request):
         except Order.DoesNotExist:
             error = "Заказ не найден"
         else:
-            # Строим цепочку декораторов
+            # Для посылки package-декоратор добавляется автоматически
+            if order.cargo_type == 'package' and 'package' not in selected:
+                selected = ['package'] + selected
+
             decorated = order
             applied = []
             for key in selected:
-                decorator_cls = DECORATOR_MAP.get(key)
+                decorator_cls = LOCAL_DECORATOR_MAP.get(key)
                 if decorator_cls:
                     decorated = decorator_cls(decorated)
                     applied.append(key)
@@ -250,7 +268,7 @@ def demo_decorator(request):
         'orders': orders,
         'result': result,
         'error': error,
-        'decorator_choices': list(DECORATOR_MAP.keys()),
+        'decorator_choices': [k for k in LOCAL_DECORATOR_MAP.keys() if k != 'package'],
     })
 
 
@@ -281,6 +299,7 @@ def demo_template(request):
         process_type = request.POST.get('process_type', 'standard')
         pickup = request.POST.get('pickup_address', '').strip()
         delivery_addr = request.POST.get('delivery_address', '').strip()
+        cargo_type = request.POST.get('cargo_type', 'document')
 
         if not pickup or not delivery_addr:
             error = "Заполните адреса"
@@ -297,6 +316,7 @@ def demo_template(request):
                     pickup_address=pickup,
                     delivery_address=delivery_addr,
                     tariff=process_type if process_type != 'standard' else 'standard',
+                    cargo_type=cargo_type,
                     price=Decimal(0),
                     status='new',
                 )
@@ -319,6 +339,7 @@ def demo_template(request):
         'result': result,
         'error': error,
         'process_choices': ['standard', 'express', 'economy'],
+        'cargo_type_choices': [('document', 'Документ'), ('package', 'Посылка')],
     })
 
 
@@ -588,6 +609,7 @@ def demo_facade(request):
         pickup = request.POST.get('pickup_address', '').strip()
         delivery_addr = request.POST.get('delivery_address', '').strip()
         decorator_keys = request.POST.getlist('decorators')
+        cargo_type = request.POST.get('cargo_type', 'document')
 
         if not pickup or not delivery_addr:
             error = "Заполните адреса отправки и доставки"
@@ -604,6 +626,7 @@ def demo_facade(request):
                         delivery_address=delivery_addr,
                         factory_type=factory_type,
                         decorator_keys=decorator_keys,
+                        cargo_type=cargo_type,
                     )
                 except Exception as e:
                     error = str(e)
@@ -612,7 +635,8 @@ def demo_facade(request):
         'result': result,
         'error': error,
         'factory_choices': list(FACTORY_MAP.keys()),
-        'decorator_choices': list(DECORATOR_MAP.keys()),
+        'decorator_choices': [k for k in DECORATOR_MAP.keys() if k != 'package'],
+        'cargo_type_choices': [('document', 'Документ'), ('package', 'Посылка')],
     })
 
 
@@ -623,14 +647,19 @@ def demo_composite(request):
     tree_rows = root.display()
 
     status_filter = request.GET.get('status_filter', '')
+    cargo_filter = request.GET.get('cargo_filter', '')
     STATUS_CHOICES = ['new', 'payment_pending', 'courier_assigned', 'in_delivery', 'delivered', 'cancelled']
+    CARGO_CHOICES = [('document', 'Документ'), ('package', 'Посылка')]
 
     iterator = OrderIterator(root)
+
+    # Сначала фильтр по типу груза, затем по статусу
+    if cargo_filter in ('document', 'package'):
+        iterator = CargoTypeFilterIterator(iterator, cargo_filter)
     if status_filter and status_filter in STATUS_CHOICES:
-        filtered = FilterIterator(iterator, status_filter)
-        iter_items = list(filtered)
-    else:
-        iter_items = list(iterator)
+        iterator = FilterIterator(iterator, status_filter)
+
+    iter_items = list(iterator)
 
     return render(request, 'app/demo_composite.html', {
         'tree_rows': tree_rows,
@@ -638,5 +667,7 @@ def demo_composite(request):
         'root_price': root.get_total_price(),
         'iter_items': iter_items,
         'status_filter': status_filter,
+        'cargo_filter': cargo_filter,
         'status_choices': STATUS_CHOICES,
+        'cargo_choices': CARGO_CHOICES,
     })

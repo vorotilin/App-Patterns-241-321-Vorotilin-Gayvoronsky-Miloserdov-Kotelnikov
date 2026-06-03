@@ -9,6 +9,7 @@
   <label>Расстояние (км):
     <input type="number" name="distance" value="{{ distance }}" min="1" max="1000" step="0.1">
   </label>
+  &nbsp;
   <label>Тариф:
     <select name="tariff">
       <option value="economy" {% if tariff == 'economy' %}selected{% endif %}>Эконом</option>
@@ -16,6 +17,11 @@
       <option value="express" {% if tariff == 'express' %}selected{% endif %}>Экспресс</option>
     </select>
   </label>
+  &nbsp;
+  Тип груза:
+  <label><input type="radio" name="cargo_type" value="document" {% if cargo_type != 'package' %}checked{% endif %}> Документ</label>
+  <label><input type="radio" name="cargo_type" value="package" {% if cargo_type == 'package' %}checked{% endif %}> Посылка (×1.4)</label>
+  &nbsp;
   <button type="submit">Рассчитать</button>
 </form>
 
@@ -25,9 +31,29 @@
 
 <h2>Сравнение тарифов для {{ distance }} км</h2>
 <table border="1" cellpadding="4">
-  <tr><th>Тариф</th><th>Ставка</th><th>Стоимость</th></tr>
-  <tr><td>Эконом</td><td>50 руб/км</td><td>{{ compare.economy }} руб.</td></tr>
-  <tr><td>Стандарт</td><td>80 руб/км</td><td>{{ compare.standard }} руб.</td></tr>
-  <tr><td>Экспресс</td><td>150 руб/км</td><td>{{ compare.express }} руб.</td></tr>
+  <tr>
+    <th>Тариф</th>
+    <th>Ставка</th>
+    <th>Документ</th>
+    <th>Посылка (×1.4)</th>
+  </tr>
+  <tr>
+    <td>Эконом</td>
+    <td>50 руб/км</td>
+    <td>{{ compare.economy.document }} руб.</td>
+    <td>{{ compare.economy.package }} руб.</td>
+  </tr>
+  <tr>
+    <td>Стандарт</td>
+    <td>80 руб/км</td>
+    <td>{{ compare.standard.document }} руб.</td>
+    <td>{{ compare.standard.package }} руб.</td>
+  </tr>
+  <tr>
+    <td>Экспресс</td>
+    <td>150 руб/км</td>
+    <td>{{ compare.express.document }} руб.</td>
+    <td>{{ compare.express.package }} руб.</td>
+  </tr>
 </table>
 {% endblock %}

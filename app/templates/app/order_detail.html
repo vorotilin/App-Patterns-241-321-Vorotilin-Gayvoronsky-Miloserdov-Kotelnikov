@@ -13,6 +13,7 @@
       <table class="table table-sm mb-0">
         <tr><th class="ps-3">Клиент</th><td>{{ order.user.username }}</td></tr>
         <tr><th class="ps-3">Тариф</th><td>{{ order.get_tariff_display }}</td></tr>
+        <tr><th class="ps-3">Тип груза</th><td>{{ order.get_cargo_type_display }}</td></tr>
         <tr><th class="ps-3">Статус</th><td><strong>{{ order.get_status_display }}</strong></td></tr>
         <tr><th class="ps-3">Цена</th><td>{{ order.price }} руб.</td></tr>
         <tr><th class="ps-3">Откуда</th><td>{{ order.pickup_address }}</td></tr>

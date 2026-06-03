@@ -13,7 +13,7 @@
     <select name="order_id">
       {% for order in orders %}
       <option value="{{ order.id }}">
-        #{{ order.id }} — {{ order.get_tariff_display }} — {{ order.price }} руб. ({{ order.user.username }})
+        #{{ order.id }} — {{ order.get_tariff_display }} — {{ order.get_cargo_type_display }} — {{ order.price }} руб. ({{ order.user.username }})
       </option>
       {% endfor %}
     </select>
@@ -28,7 +28,7 @@
     <label><input type="checkbox" name="decorators" value="fragile"> Хрупкий товар (+800 руб.)</label><br>
     <label><input type="checkbox" name="decorators" value="signature"> Требуется подпись (+200 руб.)</label>
   </fieldset>
-  <br>
+  <p><small>Для заказов типа «Посылка» надбавка +300 руб. применяется автоматически.</small></p>
   <button type="submit">Применить декораторы</button>
 </form>
 
@@ -37,6 +37,7 @@
 <table border="1" cellpadding="4">
   <tr><th>Параметр</th><th>Значение</th></tr>
   <tr><td>Заказ</td><td>#{{ result.order.id }} ({{ result.order.get_tariff_display }})</td></tr>
+  <tr><td>Тип груза</td><td>{{ result.order.get_cargo_type_display }}</td></tr>
   <tr><td>Базовая цена</td><td>{{ result.base_price }} руб.</td></tr>
   <tr><td>Применённые декораторы</td><td>{{ result.applied|join:", " }}</td></tr>
   <tr><td>Итоговая цена</td><td><strong>{{ result.final_price }} руб.</strong></td></tr>

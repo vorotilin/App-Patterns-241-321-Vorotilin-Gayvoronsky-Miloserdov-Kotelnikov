@@ -5,6 +5,7 @@
 
 <h3>Дерево заказов (Composite)</h3>
 <p>Итого: {{ root_count }} заказов, {{ root_price }} руб.</p>
+<p><small>Структура: Все заказы → Тип груза → Тариф → Статус → Заказ</small></p>
 <table border="1" cellpadding="4" cellspacing="0">
   <tr><th>Уровень</th><th>Узел</th></tr>
   {% for row in tree_rows %}
@@ -23,7 +24,16 @@
 <h3>Обход итератором</h3>
 
 <form method="get">
-  <label>Фильтр по статусу:
+  <label>Тип груза:
+    <select name="cargo_filter">
+      <option value="">— все —</option>
+      {% for value, label in cargo_choices %}
+        <option value="{{ value }}" {% if value == cargo_filter %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  &nbsp;
+  <label>Статус:
     <select name="status_filter">
       <option value="">— все —</option>
       {% for s in status_choices %}
@@ -40,6 +50,7 @@
   <tr>
     <th>#</th>
     <th>Заказ</th>
+    <th>Груз</th>
     <th>Тариф</th>
     <th>Статус</th>
     <th>Клиент</th>
@@ -49,13 +60,14 @@
     <tr>
       <td>{{ forloop.counter }}</td>
       <td><a href="{% url 'order_detail' leaf.order.id %}">#{{ leaf.order.id }}</a></td>
+      <td>{{ leaf.order.get_cargo_type_display }}</td>
       <td>{{ leaf.order.get_tariff_display }}</td>
       <td>{{ leaf.order.get_status_display }}</td>
       <td>{{ leaf.order.user.username }}</td>
       <td>{{ leaf.order.price }}</td>
     </tr>
   {% empty %}
-    <tr><td colspan="6">Нет заказов</td></tr>
+    <tr><td colspan="7">Нет заказов</td></tr>
   {% endfor %}
 </table>
 {% endblock %}

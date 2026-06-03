@@ -38,7 +38,12 @@ class Order(models.Model):
         ('standard', 'Стандарт'),
         ('express', 'Экспресс'),
     ]
-    
+
+    CARGO_TYPE_CHOICES = [
+        ('document', 'Документ'),
+        ('package', 'Посылка'),
+    ]
+
     STATUS_CHOICES = [
         ('new', 'Новый'),
         ('payment_pending', 'Ожидает оплаты'),
@@ -55,6 +60,7 @@ class Order(models.Model):
     delivery_address = models.CharField(max_length=255)
     
     tariff = models.CharField(max_length=20, choices=TARIFF_CHOICES, default='economy')
+    cargo_type = models.CharField(max_length=20, choices=CARGO_TYPE_CHOICES, default='document')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     distance_km = models.FloatField(default=5.0)
 
@@ -95,7 +101,7 @@ class Order(models.Model):
         }
         strategy = strategy_map.get(self.tariff, StandardTariff())
         from decimal import Decimal
-        self.price = Decimal(str(strategy.calculate_price(self.distance_km)))
+        self.price = Decimal(str(strategy.calculate_price(self.distance_km, self.cargo_type)))
 
     def next_state(self):
         self.state.next(self)

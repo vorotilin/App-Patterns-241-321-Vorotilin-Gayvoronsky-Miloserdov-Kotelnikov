@@ -53,6 +53,7 @@ class OrderLeaf(OrderComponent):
             "text": (
                 f"Заказ #{self._order.id}"
                 f" [{self._order.get_tariff_display()}]"
+                f" [{self._order.get_cargo_type_display()}]"
                 f" {self._order.get_status_display()}"
                 f" — {self._order.price} руб."
             ),
@@ -96,12 +97,17 @@ class OrderGroup(OrderComponent):
 
 def build_tree_from_db() -> OrderGroup:
     """
-    Строит дерево из БД: корень → группы по тарифу → группы по статусу → листья.
+    Строит дерево из БД:
+    корень → тип груза → тариф → статус → листья.
     """
     from app.models import Order
 
     root = OrderGroup("Все заказы")
 
+    cargo_labels = {
+        "document": "Документы",
+        "package": "Посылки",
+    }
     tariff_labels = {
         "economy": "Эконом",
         "standard": "Стандарт",
@@ -116,24 +122,33 @@ def build_tree_from_db() -> OrderGroup:
         "cancelled": "Отменены",
     }
 
-    tariff_groups: dict[str, OrderGroup] = {}
-    status_groups: dict[str, dict[str, OrderGroup]] = {}
+    cargo_groups: dict[str, OrderGroup] = {}
+    tariff_groups: dict[str, dict[str, OrderGroup]] = {}
+    status_groups: dict[str, dict[str, dict[str, OrderGroup]]] = {}
 
     for order in Order.objects.select_related("user").order_by("id"):
+        c = order.cargo_type
         t = order.tariff
         s = order.status
 
-        if t not in tariff_groups:
+        if c not in cargo_groups:
+            cg = OrderGroup(cargo_labels.get(c, c))
+            cargo_groups[c] = cg
+            tariff_groups[c] = {}
+            status_groups[c] = {}
+            root.add(cg)
+
+        if t not in tariff_groups[c]:
             tg = OrderGroup(tariff_labels.get(t, t))
-            tariff_groups[t] = tg
-            status_groups[t] = {}
-            root.add(tg)
+            tariff_groups[c][t] = tg
+            status_groups[c][t] = {}
+            cargo_groups[c].add(tg)
 
-        if s not in status_groups[t]:
+        if s not in status_groups[c][t]:
             sg = OrderGroup(status_labels.get(s, s))
-            status_groups[t][s] = sg
-            tariff_groups[t].add(sg)
+            status_groups[c][t][s] = sg
+            tariff_groups[c][t].add(sg)
 
-        status_groups[t][s].add(OrderLeaf(order))
+        status_groups[c][t][s].add(OrderLeaf(order))
 
     return root

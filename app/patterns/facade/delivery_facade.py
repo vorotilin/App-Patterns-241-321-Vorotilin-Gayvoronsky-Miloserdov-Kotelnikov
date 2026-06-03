@@ -14,7 +14,7 @@ from app.patterns.abstract_factory.order_factory import (
 )
 from app.patterns.decorator.order_decorator import (
     InsuranceDecorator, PriorityDecorator, SMSNotifyDecorator,
-    GiftWrapDecorator, FragileDecorator, SignatureRequiredDecorator,
+    GiftWrapDecorator, FragileDecorator, SignatureRequiredDecorator, PackageDecorator,
 )
 from app.patterns.observer.order_observer import (
     OrderSubject, ClientNotifier, CourierNotifier, LoggerObserver,
@@ -38,6 +38,7 @@ DECORATOR_MAP = {
     "gift_wrap": GiftWrapDecorator,
     "fragile": FragileDecorator,
     "signature": SignatureRequiredDecorator,
+    "package": PackageDecorator,
 }
 
 PROCESS_MAP = {
@@ -64,6 +65,7 @@ class DeliverySystemFacade:
         delivery_address: str,
         factory_type: str = "standard",
         decorator_keys: list[str] | None = None,
+        cargo_type: str = "document",
     ) -> dict:
         """
         Создаёт заказ через фабрику, применяет декораторы,
@@ -73,6 +75,12 @@ class DeliverySystemFacade:
         self._logger.log(f"[Facade] Начало создания заказа ({factory_type})")
         steps = []
 
+        # если выбрана посылка — декоратор package включается автоматически
+        if cargo_type == 'package':
+            decorator_keys = list(decorator_keys or [])
+            if 'package' not in decorator_keys:
+                decorator_keys.append('package')
+
         # 1. Abstract Factory
         factory_cls = FACTORY_MAP.get(factory_type, StandardOrderFactory)
         factory = factory_cls()
@@ -80,6 +88,7 @@ class DeliverySystemFacade:
             user=user,
             pickup_address=pickup_address,
             delivery_address=delivery_address,
+            cargo_type=cargo_type,
         )
         payment = factory.create_payment(order, order.price)
         tracking = factory.create_tracking(order)

@@ -17,6 +17,10 @@
       {% endfor %}
     </select>
   </label><br>
+  Тип груза:
+  {% for value, label in cargo_type_choices %}
+    <label><input type="radio" name="cargo_type" value="{{ value }}" {% if forloop.first %}checked{% endif %}> {{ label }}</label>
+  {% endfor %}<br>
   <label>Адрес отправки:
     <input type="text" name="pickup_address" value="ул. Красная, д. 1" size="40">
   </label><br>
@@ -32,7 +36,7 @@
   <tr><th>Объект</th><th>Параметры</th></tr>
   <tr>
     <td>Order #{{ result.order.id }}</td>
-    <td>Тариф: {{ result.order.get_tariff_display }}, Цена: {{ result.order.price }} руб., Статус: {{ result.order.get_status_display }}</td>
+    <td>Тариф: {{ result.order.get_tariff_display }}, Груз: {{ result.order.get_cargo_type_display }}, Цена: {{ result.order.price }} руб., Статус: {{ result.order.get_status_display }}</td>
   </tr>
   <tr>
     <td>Payment #{{ result.payment.id }}</td>
