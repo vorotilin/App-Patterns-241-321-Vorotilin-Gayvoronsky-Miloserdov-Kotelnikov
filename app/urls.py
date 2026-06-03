@@ -22,4 +22,8 @@ urlpatterns = [
     path('demo/observer/', views.demo_observer, name='demo_observer'),
     path('demo/proxy/', views.demo_proxy, name='demo_proxy'),
     path('demo/command/', views.demo_command, name='demo_command'),
+    path('demo/adapter/', views.demo_adapter, name='demo_adapter'),
+    path('demo/facade/', views.demo_facade, name='demo_facade'),
+    path('demo/composite/', views.demo_composite, name='demo_composite'),
+    path('demo/iterator/', views.demo_composite, name='demo_iterator'),
 ]

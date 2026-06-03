@@ -15,84 +15,84 @@ class OrderState(ABC):
 
 class NewOrderState(OrderState):
     def next(self, order):
-        from .order_state import PaymentPendingState
         order.state = PaymentPendingState()
         order.status = 'payment_pending'
+        order.state_name = 'PaymentPendingState'
         order.save()
-    
+
     def cancel(self, order):
-        from .order_state import CancelledState
         order.state = CancelledState()
         order.status = 'cancelled'
+        order.state_name = 'CancelledState'
         order.save()
-    
+
     def get_status(self):
         return "Новый заказ"
 
 class PaymentPendingState(OrderState):
     def next(self, order):
-        from .order_state import CourierAssignedState
         order.state = CourierAssignedState()
         order.status = 'courier_assigned'
+        order.state_name = 'CourierAssignedState'
         order.save()
-    
+
     def cancel(self, order):
-        from .order_state import CancelledState
         order.state = CancelledState()
         order.status = 'cancelled'
+        order.state_name = 'CancelledState'
         order.save()
-    
+
     def get_status(self):
         return "Ожидает оплаты"
 
 class CourierAssignedState(OrderState):
     def next(self, order):
-        from .order_state import InDeliveryState
         order.state = InDeliveryState()
         order.status = 'in_delivery'
+        order.state_name = 'InDeliveryState'
         order.save()
-    
+
     def cancel(self, order):
-        from .order_state import CancelledState
         order.state = CancelledState()
         order.status = 'cancelled'
+        order.state_name = 'CancelledState'
         order.save()
-    
+
     def get_status(self):
         return "Курьер назначен"
 
 class InDeliveryState(OrderState):
     def next(self, order):
-        from .order_state import DeliveredState
         order.state = DeliveredState()
         order.status = 'delivered'
+        order.state_name = 'DeliveredState'
         order.save()
-    
+
     def cancel(self, order):
-        from .order_state import CancelledState
         order.state = CancelledState()
         order.status = 'cancelled'
+        order.state_name = 'CancelledState'
         order.save()
-    
+
     def get_status(self):
         return "В доставке"
 
 class DeliveredState(OrderState):
     def next(self, order):
-        print("Заказ уже доставлен")
-    
+        pass
+
     def cancel(self, order):
-        print("Нельзя отменить доставленный заказ")
-    
+        pass
+
     def get_status(self):
         return "Доставлен"
 
 class CancelledState(OrderState):
     def next(self, order):
-        print("Отменённый заказ нельзя изменить")
-    
+        pass
+
     def cancel(self, order):
-        print("Заказ уже отменён")
-    
+        pass
+
     def get_status(self):
         return "Отменён"

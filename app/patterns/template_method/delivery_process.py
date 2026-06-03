@@ -54,17 +54,18 @@ class BaseDeliveryProcess(ABC):
 
 class StandardDelivery(BaseDeliveryProcess):
     """Стандартная доставка"""
-    
+
     def validate_order(self, order):
         self.logger.log(f"Стандартная проверка заказа #{order.id}")
         if not order.pickup_address or not order.delivery_address:
             raise ValueError("Адреса не заполнены")
-    
+
     def process_payment(self, order):
         self.logger.log(f"Обычная оплата заказа #{order.id}")
-        from app.models import Payment
+        from app.models import Payment, Tracking
         Payment.objects.create(order=order, amount=order.price, method="card")
-    
+        Tracking.objects.get_or_create(order=order, defaults={"status": "Стандартная доставка принята"})
+
     def assign_courier(self, order):
         self.logger.log(f"Назначен ближайший курьер")
         from app.models import Courier
@@ -76,15 +77,16 @@ class StandardDelivery(BaseDeliveryProcess):
 
 class ExpressDelivery(BaseDeliveryProcess):
     """Экспресс-доставка"""
-    
+
     def validate_order(self, order):
         self.logger.log(f"Минимальная проверка экспресс-заказа #{order.id}")
-    
+
     def process_payment(self, order):
         self.logger.log(f"Мгновенная оплата экспресс-заказа #{order.id}")
-        from app.models import Payment
+        from app.models import Payment, Tracking
         Payment.objects.create(order=order, amount=order.price, method="instant")
-    
+        Tracking.objects.get_or_create(order=order, defaults={"status": "Экспресс-доставка принята"})
+
     def assign_courier(self, order):
         self.logger.log(f"Назначен топ-курьер")
         from app.models import Courier
@@ -96,15 +98,16 @@ class ExpressDelivery(BaseDeliveryProcess):
 
 class EconomyDelivery(BaseDeliveryProcess):
     """Экономная доставка"""
-    
+
     def validate_order(self, order):
         self.logger.log(f"Базовая проверка экономного заказа #{order.id}")
-    
+
     def process_payment(self, order):
         self.logger.log(f"Оплата экономного заказа #{order.id}")
-        from app.models import Payment
+        from app.models import Payment, Tracking
         Payment.objects.create(order=order, amount=order.price, method="cash")
-    
+        Tracking.objects.get_or_create(order=order, defaults={"status": "Экономная доставка принята"})
+
     def assign_courier(self, order):
         self.logger.log(f"Назначен первый свободный курьер")
         from app.models import Courier

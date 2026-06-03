@@ -26,7 +26,7 @@ class NextStateCommand(Command):
 
     def undo(self):
         self._order.status = self._prev_status
-        self._order._state = None
+        self._order._order_state = None
         self._order.save()
 
     def description(self) -> str:
@@ -44,7 +44,7 @@ class CancelOrderCommand(Command):
 
     def undo(self):
         self._order.status = self._prev_status
-        self._order._state = None
+        self._order._order_state = None
         self._order.save()
 
     def description(self) -> str:

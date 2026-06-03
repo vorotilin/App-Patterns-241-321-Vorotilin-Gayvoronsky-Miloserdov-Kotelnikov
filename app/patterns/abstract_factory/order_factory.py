@@ -84,7 +84,6 @@ class PremiumOrderFactory(OrderComponentFactory):
         return Order.objects.create(**kwargs)
     
     def create_payment(self, order, amount):
-        # Премиум-платеж с возможностью рассрочки
         return Payment.objects.create(order=order, amount=amount, method="card")
     
     def create_tracking(self, order):

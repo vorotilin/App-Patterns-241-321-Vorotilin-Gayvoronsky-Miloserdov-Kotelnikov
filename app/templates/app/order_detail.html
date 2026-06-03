@@ -1,55 +1,70 @@
 {% extends "app/base.html" %}
 {% block title %}Заказ #{{ order.id }}{% endblock %}
 {% block content %}
-<h1>Заказ #{{ order.id }}</h1>
-<a href="{% url 'orders_list' %}">← Назад к списку</a>
+<div class="d-flex align-items-center gap-3 mb-3 mt-2">
+  <a href="{% url 'orders_list' %}" class="btn btn-outline-secondary btn-sm">← Назад</a>
+  <h2 class="mb-0">Заказ #{{ order.id }}</h2>
+</div>
 
-<h2>Информация</h2>
-<table border="1" cellpadding="4">
-  <tr><th>Клиент</th><td>{{ order.user.username }}</td></tr>
-  <tr><th>Тариф</th><td>{{ order.get_tariff_display }}</td></tr>
-  <tr><th>Статус</th><td><strong>{{ order.get_status_display }}</strong></td></tr>
-  <tr><th>Цена</th><td>{{ order.price }} руб.</td></tr>
-  <tr><th>Откуда</th><td>{{ order.pickup_address }}</td></tr>
-  <tr><th>Куда</th><td>{{ order.delivery_address }}</td></tr>
-  <tr><th>Курьер</th><td>{% if order.courier %}{{ order.courier.user.username }} ({{ order.courier.vehicle }}){% else %}не назначен{% endif %}</td></tr>
-  <tr><th>Создан</th><td>{{ order.created_at|date:"d.m.Y H:i" }}</td></tr>
-</table>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-bold">Информация о заказе</div>
+      <table class="table table-sm mb-0">
+        <tr><th class="ps-3">Клиент</th><td>{{ order.user.username }}</td></tr>
+        <tr><th class="ps-3">Тариф</th><td>{{ order.get_tariff_display }}</td></tr>
+        <tr><th class="ps-3">Статус</th><td><strong>{{ order.get_status_display }}</strong></td></tr>
+        <tr><th class="ps-3">Цена</th><td>{{ order.price }} руб.</td></tr>
+        <tr><th class="ps-3">Откуда</th><td>{{ order.pickup_address }}</td></tr>
+        <tr><th class="ps-3">Куда</th><td>{{ order.delivery_address }}</td></tr>
+        <tr><th class="ps-3">Курьер</th><td>{% if order.courier %}{{ order.courier.user.username }} ({{ order.courier.vehicle }}){% else %}не назначен{% endif %}</td></tr>
+        <tr><th class="ps-3">Создан</th><td>{{ order.created_at|date:"d.m.Y H:i" }}</td></tr>
+      </table>
+    </div>
+  </div>
 
-<h2>Паттерн State — управление состоянием</h2>
-<p>Текущее состояние: <strong>{{ order.state.get_status }}</strong></p>
-<p>Переходы: new → payment_pending → courier_assigned → in_delivery → delivered</p>
-
-{% if order.status != 'delivered' and order.status != 'cancelled' %}
-<form method="post" action="{% url 'order_next_state' order.id %}">
-  {% csrf_token %}
-  <button type="submit">Перейти к следующему статусу</button>
-</form>
-<form method="post" action="{% url 'order_cancel' order.id %}">
-  {% csrf_token %}
-  <button type="submit">Отменить заказ</button>
-</form>
-{% else %}
-<p>Заказ в конечном состоянии ({{ order.get_status_display }}). Переходы невозможны.</p>
-{% endif %}
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header fw-bold">Паттерн State — управление состоянием</div>
+      <div class="card-body">
+        <p>Текущее состояние: <strong>{{ order.state.get_status }}</strong></p>
+        <pre class="mb-3">new → payment_pending → courier_assigned → in_delivery → delivered</pre>
+        {% if order.status != 'delivered' and order.status != 'cancelled' %}
+        <form method="post" action="{% url 'order_next_state' order.id %}" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-primary btn-sm" type="submit">Следующий статус →</button>
+        </form>
+        <form method="post" action="{% url 'order_cancel' order.id %}" class="d-inline ms-2">
+          {% csrf_token %}
+          <button class="btn btn-danger btn-sm" type="submit">Отменить заказ</button>
+        </form>
+        {% else %}
+        <p class="text-muted mb-0">Конечное состояние ({{ order.get_status_display }}). Переходы невозможны.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
 {% if payments %}
-<h2>Платежи</h2>
-<table border="1" cellpadding="4">
-  <tr><th>#</th><th>Сумма</th><th>Метод</th></tr>
-  {% for p in payments %}
-  <tr><td>{{ p.id }}</td><td>{{ p.amount }} руб.</td><td>{{ p.method }}</td></tr>
-  {% endfor %}
-</table>
+<div class="card mt-3">
+  <div class="card-header fw-bold">Платежи</div>
+  <table class="table table-sm mb-0">
+    <thead><tr><th>#</th><th>Сумма</th><th>Метод</th></tr></thead>
+    <tbody>
+    {% for p in payments %}
+    <tr><td>{{ p.id }}</td><td>{{ p.amount }} руб.</td><td>{{ p.method }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endif %}
 
 {% if tracking %}
-<h2>Трекинг</h2>
-<p>Статус трекинга: {{ tracking.status }}</p>
+<div class="alert alert-info mt-3">Трекинг: {{ tracking.status }}</div>
 {% endif %}
 
 {% if review %}
-<h2>Отзыв</h2>
-<p>Оценка: {{ review.rating }} / 5</p>
+<div class="alert alert-success mt-3">Отзыв: {{ review.rating }} / 5 ⭐</div>
 {% endif %}
 {% endblock %}

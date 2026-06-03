@@ -66,9 +66,11 @@ class Order(models.Model):
     
     @property
     def state(self):
-        if not hasattr(self, '_state') or self._state is None:
-            from app.patterns.state.order_state import NewOrderState, PaymentPendingState, CourierAssignedState, InDeliveryState, DeliveredState, CancelledState
-            
+        if not hasattr(self, '_order_state') or self._order_state is None:
+            from app.patterns.state.order_state import (
+                NewOrderState, PaymentPendingState, CourierAssignedState,
+                InDeliveryState, DeliveredState, CancelledState,
+            )
             state_map = {
                 'new': NewOrderState(),
                 'payment_pending': PaymentPendingState(),
@@ -77,12 +79,12 @@ class Order(models.Model):
                 'delivered': DeliveredState(),
                 'cancelled': CancelledState(),
             }
-            self._state = state_map.get(self.status, NewOrderState())
-        return self._state
-    
+            self._order_state = state_map.get(self.status, NewOrderState())
+        return self._order_state
+
     @state.setter
     def state(self, value):
-        self._state = value
+        self._order_state = value
     
     def apply_tariff(self):
         from app.patterns.strategy.tariff_strategy import EconomyTariff, StandardTariff, ExpressTariff

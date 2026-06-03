@@ -1,0 +1,78 @@
+{% extends "app/base.html" %}
+{% block title %}Adapter — Система доставки{% endblock %}
+{% block content %}
+<h2>Adapter (Адаптер)</h2>
+<p>
+  Внешние сервисы <code>ExternalSMSGateway</code> и <code>ExternalEmailService</code>
+  имеют собственные методы (<code>send_message</code> / <code>dispatch</code>),
+  несовместимые с интерфейсом <code>OrderObserver</code>.
+  Адаптеры оборачивают их, реализуя метод <code>update(order, event)</code>,
+  и позволяют подключать любые внешние сервисы к системе уведомлений без изменения её кода.
+</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  <p>
+    <label>Заказ:
+      <select name="order_id">
+        {% for o in orders %}
+          <option value="{{ o.id }}">
+            #{{ o.id }} — {{ o.user.username }} ({{ o.get_status_display }})
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+  </p>
+
+  <p>
+    <label>Событие: <input type="text" name="event" placeholder="Статус изменён" size="40"></label>
+  </p>
+
+  <p>Адаптеры для подключения:</p>
+  <p>
+    <label><input type="checkbox" name="adapters" value="sms" checked> SMS-адаптер (ExternalSMSGateway)</label><br>
+    <label><input type="checkbox" name="adapters" value="email" checked> Email-адаптер (ExternalEmailService)</label>
+  </p>
+
+  <p><button type="submit">Отправить уведомления</button></p>
+</form>
+
+{% if error %}
+  <p><strong>Ошибка:</strong> {{ error }}</p>
+{% endif %}
+
+{% if result %}
+  <hr>
+  <h3>Результат</h3>
+  <p>Заказ #{{ result.order.id }}, событие: «{{ result.event }}»</p>
+  <p>Подключены адаптеры: {{ result.attached|join:", " }}</p>
+  <table border="1" cellpadding="4" cellspacing="0">
+    <tr>
+      <th>Сервис</th>
+      <th>Получатель</th>
+      <th>Сообщение</th>
+      <th>Статус</th>
+    </tr>
+    {% for msg in result.sent %}
+      <tr>
+        <td>{{ msg.gateway|default:msg.service }}</td>
+        <td>{{ msg.phone|default:msg.to }}</td>
+        <td>{{ msg.text|default:msg.body }}</td>
+        <td>{{ msg.status }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">Нет отправленных сообщений</td></tr>
+    {% endfor %}
+  </table>
+
+  <h4>Схема работы</h4>
+  <pre>
+OrderSubject.notify()
+  └─ SMSGatewayAdapter.update(order, event)
+       └─ ExternalSMSGateway.send_message(phone, text)
+  └─ EmailServiceAdapter.update(order, event)
+       └─ ExternalEmailService.dispatch(email, subject, body)
+  </pre>
+{% endif %}
+{% endblock %}

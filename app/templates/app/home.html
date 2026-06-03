@@ -1,34 +1,94 @@
 {% extends "app/base.html" %}
 {% block title %}Главная — Система доставки{% endblock %}
 {% block content %}
-<h1>Автоматизированная система доставки документов</h1>
-<p>Группа 241-321 | Воротилин, Гайворонский, Милосердов, Котельников</p>
+<div class="py-3">
+  <h1 class="display-6 fw-bold">Автоматизированная система доставки документов</h1>
+  <p class="text-muted">Группа 241-321 | Воротилин, Гайворонский, Милосердов, Котельников</p>
+</div>
 
-<h2>Статистика БД</h2>
-<table border="1" cellpadding="4">
-  <tr><th>Сущность</th><th>Количество</th></tr>
-  <tr><td>Заказы</td><td>{{ orders_count }}</td></tr>
-  <tr><td>Курьеры</td><td>{{ couriers_count }}</td></tr>
-  <tr><td>Клиенты</td><td>{{ clients_count }}</td></tr>
-  <tr><td>Платежи</td><td>{{ payments_count }}</td></tr>
-</table>
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="card text-bg-primary text-center">
+      <div class="card-body">
+        <h3 class="card-title">{{ orders_count }}</h3>
+        <p class="card-text mb-0">Заказов</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="card text-bg-success text-center">
+      <div class="card-body">
+        <h3 class="card-title">{{ couriers_count }}</h3>
+        <p class="card-text mb-0">Курьеров</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="card text-bg-info text-center">
+      <div class="card-body">
+        <h3 class="card-title">{{ clients_count }}</h3>
+        <p class="card-text mb-0">Клиентов</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="card text-bg-warning text-center">
+      <div class="card-body">
+        <h3 class="card-title">{{ payments_count }}</h3>
+        <p class="card-text mb-0">Платежей</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-<h2>Реализованные паттерны</h2>
-<ul>
-  <li><a href="{% url 'demo_singleton' %}">Singleton</a> — Logger: единственный экземпляр</li>
-  <li><a href="{% url 'demo_strategy' %}">Strategy</a> — расчёт цены по тарифу (Economy/Standard/Express)</li>
-  <li><a href="{% url 'demo_factory' %}">Abstract Factory</a> — создание заказа + платёж + трекинг</li>
-  <li><a href="{% url 'demo_decorator' %}">Decorator</a> — добавление услуг к заказу</li>
-  <li><a href="{% url 'demo_state' %}">State</a> — жизненный цикл заказа</li>
-  <li><a href="{% url 'demo_template' %}">Template Method</a> — шаблонный процесс доставки</li>
-  <li><a href="{% url 'demo_astar' %}">A* (Dijkstra)</a> — кратчайший маршрут доставки</li>
-</ul>
+<div class="row g-4">
 
-<h2>Бизнес-процессы</h2>
-<ol>
-  <li><strong>БП1: Создание и обработка заказа</strong> — клиент создаёт заказ → оплата → назначение курьера → доставка</li>
-  <li><strong>БП2: Маршрутизация</strong> — выбор кратчайшего пути доставки через граф узлов (A*)</li>
-</ol>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header bg-warning text-dark fw-bold">Порождающие паттерны</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><a href="{% url 'demo_singleton' %}">Singleton</a> — Logger: единственный экземпляр</li>
+        <li class="list-group-item"><a href="{% url 'demo_factory' %}">Abstract Factory</a> — заказ + платёж + трекинг одной фабрикой</li>
+        <li class="list-group-item"><a href="{% url 'demo_decorator' %}">Decorator</a> — динамическое добавление услуг к заказу</li>
+      </ul>
+    </div>
+  </div>
 
-<p><a href="{% url 'orders_list' %}">Перейти к списку заказов →</a></p>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header bg-primary text-white fw-bold">Поведенческие паттерны</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><a href="{% url 'demo_strategy' %}">Strategy</a> — расчёт цены по тарифу</li>
+        <li class="list-group-item"><a href="{% url 'demo_state' %}">State</a> — жизненный цикл заказа</li>
+        <li class="list-group-item"><a href="{% url 'demo_template' %}">Template Method</a> — шаблонный процесс доставки</li>
+        <li class="list-group-item"><a href="{% url 'demo_observer' %}">Observer</a> — уведомление подписчиков</li>
+        <li class="list-group-item"><a href="{% url 'demo_command' %}">Command</a> — команды с поддержкой Undo</li>
+        <li class="list-group-item"><a href="{% url 'demo_iterator' %}">Iterator</a> — обход иерархии заказов</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header bg-success text-white fw-bold">Структурные паттерны</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><a href="{% url 'demo_proxy' %}">Proxy</a> — контроль доступа по роли</li>
+        <li class="list-group-item"><a href="{% url 'demo_adapter' %}">Adapter</a> — SMS / Email через единый интерфейс</li>
+        <li class="list-group-item"><a href="{% url 'demo_facade' %}">Facade</a> — единая точка входа в систему</li>
+        <li class="list-group-item"><a href="{% url 'demo_composite' %}">Composite</a> — дерево заказов по тарифу/статусу</li>
+        <li class="list-group-item"><a href="{% url 'demo_astar' %}">A* (Dijkstra)</a> — кратчайший маршрут доставки</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="mt-4">
+  <h5>Бизнес-процессы</h5>
+  <ol>
+    <li><strong>БП1: Создание и обработка заказа</strong> — клиент создаёт заказ → оплата → назначение курьера → доставка</li>
+    <li><strong>БП2: Маршрутизация</strong> — выбор кратчайшего пути доставки через граф узлов (A*)</li>
+  </ol>
+  <a href="{% url 'orders_list' %}" class="btn btn-primary">Перейти к списку заказов →</a>
+</div>
 {% endblock %}

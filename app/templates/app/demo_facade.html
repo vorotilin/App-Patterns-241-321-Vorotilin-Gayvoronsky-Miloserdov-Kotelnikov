@@ -1,0 +1,78 @@
+{% extends "app/base.html" %}
+{% block title %}Facade — Система доставки{% endblock %}
+{% block content %}
+<h2>Facade (Фасад)</h2>
+<p>
+  <code>DeliverySystemFacade</code> предоставляет единую точку входа для клиентского кода.
+  Один вызов <code>create_order()</code> координирует AbstractFactory, Decorator,
+  Observer, Command и Singleton Logger — клиент не взаимодействует
+  с подсистемами напрямую.
+</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  <p>
+    <label>Тип фабрики:
+      <select name="factory_type">
+        {% for fc in factory_choices %}
+          <option value="{{ fc }}">{{ fc }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </p>
+
+  <p>
+    <label>Адрес отправки: <input type="text" name="pickup_address" value="ул. Ленина, 1" size="35"></label>
+  </p>
+  <p>
+    <label>Адрес доставки: <input type="text" name="delivery_address" value="пр. Мира, 10" size="35"></label>
+  </p>
+
+  <p>Дополнительные услуги (декораторы):</p>
+  <p>
+    {% for dc in decorator_choices %}
+      <label><input type="checkbox" name="decorators" value="{{ dc }}"> {{ dc }}</label><br>
+    {% endfor %}
+  </p>
+
+  <p><button type="submit">Создать заказ через Фасад</button></p>
+</form>
+
+{% if error %}
+  <p><strong>Ошибка:</strong> {{ error }}</p>
+{% endif %}
+
+{% if result %}
+  <hr>
+  <h3>Результат</h3>
+  <table border="1" cellpadding="4" cellspacing="0">
+    <tr><th>Поле</th><th>Значение</th></tr>
+    <tr><td>Заказ</td><td>#{{ result.order.id }}</td></tr>
+    <tr><td>Фабрика</td><td>{{ result.factory_type }}</td></tr>
+    <tr><td>Тариф</td><td>{{ result.order.get_tariff_display }}</td></tr>
+    <tr><td>Статус</td><td>{{ result.order.get_status_display }}</td></tr>
+    <tr><td>Базовая цена</td><td>{{ result.order.price }} руб.</td></tr>
+    <tr><td>Цена с услугами</td><td>{{ result.final_price }} руб.</td></tr>
+    <tr><td>Декораторы</td><td>{{ result.applied_decorators|join:", "|default:"нет" }}</td></tr>
+    <tr><td>Метод оплаты</td><td>{{ result.payment.method }}</td></tr>
+    <tr><td>Трекинг</td><td>{{ result.tracking.status }}</td></tr>
+  </table>
+
+  <h4>Шаги выполнения</h4>
+  <ol>
+    {% for step in result.steps %}
+      <li>{{ step }}</li>
+    {% endfor %}
+  </ol>
+
+  <h4>Уведомления наблюдателей</h4>
+  <ul>
+    {% for n in result.notifications %}
+      <li>{{ n }}</li>
+    {% empty %}
+      <li>нет уведомлений</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

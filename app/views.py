@@ -24,6 +24,10 @@ from app.patterns.command.order_command import (
     NextStateCommand, CancelOrderCommand, AssignCourierCommand, CommandHistory
 )
 from app.math_models.shortest_path import ShortestPathFinder
+from app.patterns.adapter.notification_adapter import SMSGatewayAdapter, EmailServiceAdapter
+from app.patterns.facade.delivery_facade import DeliverySystemFacade, FACTORY_MAP, DECORATOR_MAP
+from app.patterns.composite.order_composite import build_tree_from_db, OrderGroup, OrderLeaf
+from app.patterns.iterator.order_iterator import OrderIterator, FilterIterator
 
 
 # ── Главная ──────────────────────────────────────────────────────────────────
@@ -522,4 +526,117 @@ def demo_command(request):
         'result': result,
         'error': error,
         'history': [cmd.description() for cmd in history],
+    })
+
+
+# ── ADAPTER ───────────────────────────────────────────────────────────────────
+
+def demo_adapter(request):
+    orders = Order.objects.select_related('user', 'courier').order_by('-id')[:10]
+    result = None
+    error = None
+
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        event = request.POST.get('event', '').strip()
+        adapters_selected = request.POST.getlist('adapters')
+
+        try:
+            order = Order.objects.select_related('user', 'courier').get(id=order_id)
+        except Order.DoesNotExist:
+            error = "Заказ не найден"
+        else:
+            subject = OrderSubject()
+            sms_adapter = SMSGatewayAdapter()
+            email_adapter = EmailServiceAdapter()
+
+            adapter_map = {
+                'sms': sms_adapter,
+                'email': email_adapter,
+            }
+            attached = []
+            for key in adapters_selected:
+                if key in adapter_map:
+                    subject.attach(adapter_map[key])
+                    attached.append(key)
+
+            subject.notify(order, event or "Тестовое событие")
+
+            sent = sms_adapter.sent + email_adapter.sent
+            result = {
+                'order': order,
+                'event': event or "Тестовое событие",
+                'attached': attached,
+                'sent': sent,
+            }
+
+    return render(request, 'app/demo_adapter.html', {
+        'orders': orders,
+        'result': result,
+        'error': error,
+    })
+
+
+# ── FACADE ────────────────────────────────────────────────────────────────────
+
+def demo_facade(request):
+    result = None
+    error = None
+
+    if request.method == 'POST':
+        factory_type = request.POST.get('factory_type', 'standard')
+        pickup = request.POST.get('pickup_address', '').strip()
+        delivery_addr = request.POST.get('delivery_address', '').strip()
+        decorator_keys = request.POST.getlist('decorators')
+
+        if not pickup or not delivery_addr:
+            error = "Заполните адреса отправки и доставки"
+        else:
+            user = User.objects.first()
+            if not user:
+                error = "Нет пользователей в БД. Запустите populate_db.py"
+            else:
+                try:
+                    facade = DeliverySystemFacade()
+                    result = facade.create_order(
+                        user=user,
+                        pickup_address=pickup,
+                        delivery_address=delivery_addr,
+                        factory_type=factory_type,
+                        decorator_keys=decorator_keys,
+                    )
+                except Exception as e:
+                    error = str(e)
+
+    return render(request, 'app/demo_facade.html', {
+        'result': result,
+        'error': error,
+        'factory_choices': list(FACTORY_MAP.keys()),
+        'decorator_choices': list(DECORATOR_MAP.keys()),
+    })
+
+
+# ── COMPOSITE + ITERATOR ──────────────────────────────────────────────────────
+
+def demo_composite(request):
+    root = build_tree_from_db()
+    tree_rows = root.display()
+
+    status_filter = request.GET.get('status_filter', '')
+    STATUS_CHOICES = ['new', 'payment_pending', 'courier_assigned', 'in_delivery', 'delivered', 'cancelled']
+
+    iterator = OrderIterator(root)
+    if status_filter and status_filter in STATUS_CHOICES:
+        filtered = FilterIterator(iterator, status_filter)
+        iter_items = list(filtered)
+    else:
+        iter_items = list(iterator)
+
+    return render(request, 'app/demo_composite.html', {
+        'tree_rows': tree_rows,
+        'root_count': root.get_count(),
+        'root_price': root.get_total_price(),
+        'iter_items': iter_items,
+        'status_filter': status_filter,
+        'status_choices': STATUS_CHOICES,
     })

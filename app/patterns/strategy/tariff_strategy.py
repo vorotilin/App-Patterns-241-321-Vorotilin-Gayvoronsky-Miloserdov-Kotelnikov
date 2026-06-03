@@ -7,7 +7,7 @@ class TariffStrategy(ABC):
 
 class EconomyTariff(TariffStrategy):
     def calculate_price(self, distance_km: float) -> float:
-        return distance_km * 50  
+        return distance_km * 50
 
 class StandardTariff(TariffStrategy):
     def calculate_price(self, distance_km: float) -> float:
